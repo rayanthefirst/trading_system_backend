@@ -2,14 +2,16 @@ import logging
 from typing import List
 import inspect
 
-import docker
+
+
+from Containerization.Docker.docker_client import containerClient
+from MongoDB.mongo_client import mongoClient
 
 from Utils.cipher import encrypt_str, decrypt_str
 
 from Brokerages.base_account_client import BaseAccountClient
 from Brokerages import ACCOUNT_CLIENTS
 
-from MongoDB.mongo_client import mongoClient
 
 from Config import ACCOUNT_CONTAINER_PREFIX
 
@@ -22,18 +24,16 @@ logger = logging.getLogger(__name__)
 class AccountHandler:
     def __init__(self) -> None:
         logger.info("Initializing trading client handler")
-        self.storage_client = mongoClient
         self.trading_clients: List[BaseAccountClient] = []
-        self.dockerClient = docker.DockerClient()
         
         self.load_trading_clients()
 
     def load_trading_clients(self):
-        for container in self.dockerClient.containers.list(all=True, filters={"name":ACCOUNT_CONTAINER_PREFIX + "*"}):
+        for container in containerClient.get_containers(ACCOUNT_CONTAINER_PREFIX):
             container.stop()
             container.remove()
 
-        for account in self.storage_client.get_all_accounts():
+        for account in mongoClient.get_all_accounts():
             for accountType in AccountType:
                 if accountType.value == account.get("account_type"):
                     account["account_type"] = accountType
@@ -55,7 +55,7 @@ class AccountHandler:
         return param_names
         
     
-    def get_trading_clients(self):
+    async def get_trading_clients(self):
         return [
             {   
                 "name": trading_client.alias, 
@@ -64,7 +64,7 @@ class AccountHandler:
                 # "id": trading_client.id,
                 "trading_client_account_type": trading_client.account_type.value,
                 # "ibkrAccountId": trading_client.accountId if trading_client.accountId == None else encrypt_str(trading_client.accountId),
-                "status": self.get_trading_client_status(trading_client.id)
+                "status": await self.get_trading_client_status(trading_client.id)
             } for trading_client in self.trading_clients
         ]
 
@@ -90,7 +90,7 @@ class AccountHandler:
         kwargs["user"] = encryptedUser
         kwargs["password"] = encryptedPassword
 
-        self.storage_client.write_account(trading_client_name,
+        mongoClient.write_account(trading_client_name,
                                         trading_client.account_type.value,
                                           trading_client.id,
                                           **{key:value for key, value in kwargs.items() if type(key) == str and type(value) == str}),
@@ -101,11 +101,11 @@ class AccountHandler:
         trading_client.disconnect()
         trading_client.container.remove()
         self.trading_clients.remove(trading_client)
-        self.storage_client.remove_account(trading_client.id)
+        mongoClient.remove_account(trading_client.id)
 
-    def get_trading_client_status(self, id: str):
+    async def get_trading_client_status(self, id: str):
         trading_client = self.get_trading_client(id)
-        return trading_client.get_status()
+        return await trading_client.get_status()
 
     def get_trading_client(self, id: str):
         for trading_client in self.trading_clients:
@@ -114,4 +114,4 @@ class AccountHandler:
 
 
 
-    
+account_handler = AccountHandler()

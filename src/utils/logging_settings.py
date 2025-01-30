@@ -46,5 +46,5 @@ email_handler.setLevel(logging.CRITICAL)
 logging.basicConfig(
     datefmt=LOG_DATEFTM,
     handlers=[log_file_handler, log_stream_handler, email_handler],
-    level=logging.INFO,
+    level=logging.WARNING,
 )

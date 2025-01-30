@@ -6,6 +6,8 @@ from Enums.order_definitions import OrderState, OrderAction
 from Enums.strategy_definitions import StrategyStatus
 from Models.contract import Contract
 
+from Utils.cipher import encrypt_str, decrypt_str
+
 from .storage_exceptions import (
     StorageConnectionError,
     StorageWriteError,
@@ -35,7 +37,6 @@ class MongoClient():
         
     def connect(self):
         # Connect to the Mongo database
-        logger.info("Connecting to Mongo database")
         count = 0
         while True:
             try:

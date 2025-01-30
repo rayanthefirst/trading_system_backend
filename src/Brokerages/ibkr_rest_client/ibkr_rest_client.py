@@ -81,7 +81,7 @@ class IBKRRestClient(BaseAccountClient):
         time.sleep(CONTAINER_START_DELAY)
         try:
             while self.is_running:
-                account_status = self.get_status()
+                account_status = await self.get_status()
                 if account_status == AccountStatus.ACTIVE:
                     break
                 time.sleep(SLEEP_SECONDS)

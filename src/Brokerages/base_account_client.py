@@ -27,7 +27,7 @@ class BaseAccountClient(ABC):
         self.account_type = account_type
         self.id = str(uuid4())
         self.dockerClient = docker.DockerClient()
-        self.container =  self.create_trading_client_container(**kwargs)
+        self.container =  None
         self.is_running = False
 
     @abstractmethod

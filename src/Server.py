@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 logger.info(f"Starting sever in {FASTAPI_ENV} environment")
 
 # MongoDB
-# from MongoDB.mongo_client import mongoClient
+from MongoDB.mongo_client import mongoClient
 
 # Docker
 from Containerization.Docker.docker_client import containerClient
@@ -25,8 +25,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# from APIRoutes.MainRouter import mainRouter
-# app.include_router(mainRouter)
+from APIRoutes.MainRouter import mainRouter
+app.include_router(mainRouter)
 
 
 if __name__ == "__main__":
