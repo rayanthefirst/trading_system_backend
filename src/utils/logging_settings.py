@@ -2,7 +2,7 @@ import logging
 import os
 from datetime import datetime
 from logging import handlers
-from config import LOGGING_LEVEL, LOGGING_FROMADDR, LOGGING_TOADDR, LOGGING_PASSWORD
+from Config import LOGGING_LEVEL, LOGGING_FROMADDR, LOGGING_TOADDR, LOGGING_PASSWORD
 
 # Logging basic configurations
 # Logging
@@ -46,5 +46,5 @@ email_handler.setLevel(logging.CRITICAL)
 logging.basicConfig(
     datefmt=LOG_DATEFTM,
     handlers=[log_file_handler, log_stream_handler, email_handler],
-    level=logging.INFO,
+    level=logging.WARNING,
 )
